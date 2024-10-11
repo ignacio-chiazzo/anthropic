@@ -7,11 +7,13 @@ module Anthropic
   module HTTP
     include HTTPHeaders
 
-    # Unused?
-    def get(path:)
-      to_json(conn.get(uri(path: path)) do |req|
+    def get(path:, parameters: nil, custom_headers: {}, jsonl: false)
+      response = conn.get(uri(path: path), parameters) do |req|
         req.headers = headers
-      end&.body)
+        req.headers.merge!(custom_headers) if custom_headers.any?
+      end
+
+      jsonl ? to_json(response&.body) : response&.body
     end
 
     # This is currently the workhorse for all API calls.
